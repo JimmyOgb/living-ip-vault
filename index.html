@@ -1,0 +1,631 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Living IP Vault — Self-Governing IP Licensing</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;500;600;700&family=Inter:wght@300;400;500;600&family=JetBrains+Mono:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg:      #0c0e10;
+  --bg1:     #121518;
+  --bg2:     #181c20;
+  --bg3:     #1f2429;
+  --border:  #262b30;
+  --border2: #343b42;
+  --gold:    #c9a14a;
+  --gold2:   #e0bc6b;
+  --gold-l:  rgba(201,161,74,.1);
+  --green:   #4ade80;
+  --green-l: rgba(74,222,128,.1);
+  --red:     #f87171;
+  --red-l:   rgba(248,113,113,.1);
+  --amber:   #fbbf24;
+  --amber-l: rgba(251,191,36,.1);
+  --blue:    #60a5fa;
+  --blue-l:  rgba(96,165,250,.1);
+  --text:    #ece8df;
+  --text2:   #7c8088;
+  --text3:   #2a2f35;
+  --serif:   'Cormorant Garamond', serif;
+  --sans:    'Inter', sans-serif;
+  --mono:    'JetBrains Mono', monospace;
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+html{font-size:14px}
+body{background:var(--bg);color:var(--text);font-family:var(--sans);min-height:100vh}
+
+body::before{content:'';position:fixed;inset:0;z-index:0;pointer-events:none;
+  background:radial-gradient(ellipse 70% 50% at 20% 0%,rgba(201,161,74,.06) 0%,transparent 60%),
+             radial-gradient(ellipse 50% 50% at 90% 100%,rgba(96,165,250,.04) 0%,transparent 60%)}
+
+header{position:sticky;top:0;z-index:100;background:rgba(12,14,16,.92);backdrop-filter:blur(14px);border-bottom:1px solid var(--border);padding:0 2rem;height:64px;display:flex;align-items:center;justify-content:space-between}
+.logo{display:flex;align-items:center;gap:13px}
+.logo-icon{width:36px;height:36px;border:1.5px solid var(--gold2);border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:16px;color:var(--gold2)}
+.logo-name{font-family:var(--serif);font-weight:700;font-size:21px;letter-spacing:.01em;color:var(--text)}
+.logo-sub{font-family:var(--mono);font-size:9px;color:var(--text2);letter-spacing:.08em;margin-top:1px}
+.header-right{display:flex;align-items:center;gap:10px}
+.hchip{display:flex;align-items:center;gap:6px;padding:5px 11px;border:1px solid var(--border2);border-radius:999px;font-family:var(--mono);font-size:10px;color:var(--text2);background:var(--bg1)}
+.hdot{width:5px;height:5px;border-radius:50%;animation:pulse 2s infinite}
+.hdot.g{background:var(--gold2);box-shadow:0 0 6px var(--gold2)}
+.hdot.b{background:var(--blue);box-shadow:0 0 6px var(--blue)}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.4}}
+.contract-tag{font-family:var(--mono);font-size:9px;color:var(--text2);padding:5px 11px;border:1px solid var(--border);border-radius:6px;background:var(--bg1)}
+
+.wrap{position:relative;z-index:1;max-width:1140px;margin:0 auto;padding:2.5rem 1.5rem 5rem}
+
+.hero{text-align:center;padding:1.5rem 0 3rem}
+.hero-badge{display:inline-flex;align-items:center;gap:8px;padding:6px 16px;border:1px solid rgba(201,161,74,.3);border-radius:999px;font-size:11px;color:var(--gold2);background:var(--gold-l);margin-bottom:1.75rem;letter-spacing:.05em;font-family:var(--mono)}
+.hero-title{font-family:var(--serif);font-size:clamp(2.2rem,5.5vw,3.5rem);font-weight:600;letter-spacing:-.01em;line-height:1.15;margin-bottom:1.1rem}
+.hero-title em{font-style:italic;color:var(--gold2)}
+.hero-sub{font-size:1.05rem;color:var(--text2);max-width:600px;margin:0 auto;line-height:1.7;font-weight:300}
+
+.stats{display:grid;grid-template-columns:repeat(4,1fr);gap:1rem;margin-bottom:2rem}
+.stat{background:var(--bg1);border:1px solid var(--border);border-radius:10px;padding:1.1rem;text-align:center;position:relative;overflow:hidden}
+.stat::before{content:'';position:absolute;top:0;left:0;right:0;height:2px}
+.stat:nth-child(1)::before{background:var(--gold2)}.stat:nth-child(2)::before{background:var(--green)}.stat:nth-child(3)::before{background:var(--amber)}.stat:nth-child(4)::before{background:var(--blue)}
+.stat-label{font-family:var(--mono);font-size:9px;letter-spacing:.1em;text-transform:uppercase;color:var(--text2);margin-bottom:8px}
+.stat-val{font-family:var(--serif);font-size:1.9rem;font-weight:600}
+.stat-val.gold{color:var(--gold2)}.stat-val.green{color:var(--green)}.stat-val.amber{color:var(--amber)}.stat-val.blue{color:var(--blue)}
+
+.tabs{display:flex;gap:4px;margin-bottom:1.5rem;padding:4px;background:var(--bg1);border:1px solid var(--border);border-radius:10px;width:fit-content}
+.tab{padding:9px 18px;border-radius:7px;font-size:12px;font-weight:500;cursor:pointer;color:var(--text2);transition:all .2s;border:none;background:transparent;font-family:var(--sans)}
+.tab:hover{color:var(--text)}
+.tab.active{background:var(--bg3);color:var(--gold2)}
+.panel{display:none}.panel.active{display:block}
+
+.grid{display:grid;grid-template-columns:1fr 1fr;gap:1.5rem;margin-bottom:1.5rem}
+.grid-full{grid-column:1/-1}
+
+.card{background:var(--bg1);border:1px solid var(--border);border-radius:12px;padding:1.6rem;position:relative}
+.card-title{font-family:var(--serif);font-size:18px;font-weight:600;color:var(--text);margin-bottom:1.3rem;display:flex;align-items:center;gap:10px}
+.card-icon{width:28px;height:28px;border-radius:7px;display:flex;align-items:center;justify-content:center;font-size:13px;flex-shrink:0}
+.ci-gold{background:var(--gold-l)}.ci-green{background:var(--green-l)}.ci-amber{background:var(--amber-l)}.ci-blue{background:var(--blue-l)}.ci-red{background:var(--red-l)}
+.method-tag{margin-left:auto;font-family:var(--mono);font-size:9px;color:var(--text2);padding:3px 9px;border:1px solid var(--border2);border-radius:4px}
+
+.field{margin-bottom:13px}
+.field:last-child{margin-bottom:0}
+.field-label{display:block;font-family:var(--mono);font-size:9px;letter-spacing:.1em;text-transform:uppercase;color:var(--text2);margin-bottom:6px}
+.field input,.field textarea,.field select{width:100%;background:var(--bg);border:1px solid var(--border2);color:var(--text);font-family:var(--mono);font-size:11px;padding:10px 13px;outline:none;border-radius:8px;transition:all .2s}
+.field input:focus,.field textarea:focus{border-color:var(--gold);box-shadow:0 0 0 3px rgba(201,161,74,.1);background:var(--bg1)}
+.field textarea{resize:vertical;min-height:74px;line-height:1.6}
+.field input::placeholder,.field textarea::placeholder{color:var(--text3);font-style:italic}
+.field-row{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.field-row3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px}
+.checkbox-row{display:flex;flex-wrap:wrap;gap:14px;margin-top:6px}
+.checkbox-item{display:flex;align-items:center;gap:6px;font-family:var(--mono);font-size:10px;color:var(--text2)}
+.checkbox-item input{width:auto;accent-color:var(--gold)}
+
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;padding:11px 20px;border-radius:8px;font-family:var(--sans);font-size:12px;font-weight:600;cursor:pointer;border:1px solid;background:transparent;transition:all .2s}
+.btn:hover{transform:translateY(-1px)}.btn:active{transform:none}.btn:disabled{opacity:.35;cursor:not-allowed;transform:none!important}
+.btn-gold{background:linear-gradient(135deg,var(--gold),#a07f30);color:#0c0e10;border-color:transparent;box-shadow:0 4px 14px rgba(201,161,74,.25)}
+.btn-gold:hover{box-shadow:0 8px 22px rgba(201,161,74,.35)}
+.btn-green{color:var(--green);border-color:rgba(74,222,128,.3)}.btn-green:hover{background:var(--green-l)}
+.btn-red{color:var(--red);border-color:rgba(248,113,113,.3)}.btn-red:hover{background:var(--red-l)}
+.btn-outline{color:var(--text2);border-color:var(--border2)}.btn-outline:hover{border-color:var(--gold2);color:var(--gold2)}
+.btn-full{width:100%}
+.spinner{width:12px;height:12px;border:2px solid rgba(12,14,16,.3);border-top-color:#0c0e10;border-radius:50%;animation:spin .6s linear infinite;display:inline-block}
+.spinner.dark{border-color:var(--border2);border-top-color:var(--gold2)}
+@keyframes spin{to{transform:rotate(360deg)}}
+
+.terminal{margin-top:14px;background:#08090a;border:1px solid var(--border);border-radius:10px;overflow:hidden;display:none}
+.terminal.visible{display:block;animation:fade-up .3s ease}
+@keyframes fade-up{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
+.term-bar{display:flex;align-items:center;gap:6px;padding:7px 12px;background:var(--bg2);border-bottom:1px solid var(--border)}
+.tdot{width:8px;height:8px;border-radius:50%}
+.term-lbl{font-family:var(--mono);font-size:9px;color:var(--text2);margin-left:6px;letter-spacing:.06em}
+.term-out{padding:12px 14px;font-family:var(--mono);font-size:10px;line-height:1.9;white-space:pre-wrap;word-break:break-all;max-height:220px;overflow-y:auto;color:var(--text2)}
+.term-out::-webkit-scrollbar{width:3px}.term-out::-webkit-scrollbar-thumb{background:var(--border2)}
+.tg{color:var(--green)}.tr{color:var(--red)}.tb{color:var(--blue)}.ta{color:var(--amber)}.td{color:#4a5058}.tw{color:var(--text)}.tgold{color:var(--gold2)}
+
+.result-card{border-radius:12px;padding:1.4rem 1.6rem;margin-top:14px;display:none;border:1px solid}
+.result-card.visible{display:block;animation:fade-up .4s ease}
+.result-card.active{border-color:rgba(74,222,128,.3);background:var(--green-l)}
+.result-card.suspended{border-color:rgba(248,113,113,.3);background:var(--red-l)}
+.result-card.neutral{border-color:var(--border2);background:var(--bg2)}
+.rc-label{font-family:var(--serif);font-size:18px;font-weight:600;margin-bottom:10px}
+.result-card.active .rc-label{color:var(--green)}.result-card.suspended .rc-label{color:var(--red)}
+.rc-meta{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-top:12px}
+.rc-meta-item{text-align:center}
+.rc-meta-label{font-family:var(--mono);font-size:9px;color:var(--text2);text-transform:uppercase;letter-spacing:.05em;margin-bottom:4px}
+.rc-meta-val{font-family:var(--mono);font-size:14px;font-weight:600;color:var(--text)}
+
+.asset-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:1rem}
+.asset-card{background:var(--bg2);border:1px solid var(--border);border-radius:12px;padding:1.1rem;position:relative;overflow:hidden}
+.asset-card::before{content:'';position:absolute;top:0;left:0;right:0;height:2px}
+.asset-card.active-ip::before{background:var(--green)}
+.asset-card.suspended-ip::before{background:var(--red)}
+.ac-head{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:10px}
+.ac-title{font-family:var(--serif);font-weight:600;font-size:16px;color:var(--text)}
+.ac-id{font-family:var(--mono);font-size:9px;color:var(--text2)}
+.status-pill{padding:3px 10px;border-radius:999px;font-family:var(--mono);font-size:9px;font-weight:600;letter-spacing:.04em;text-transform:uppercase;border:1px solid}
+.sp-active{color:var(--green);border-color:rgba(74,222,128,.3);background:var(--green-l)}
+.sp-suspended{color:var(--red);border-color:rgba(248,113,113,.3);background:var(--red-l)}
+.sp-appeal{color:var(--amber);border-color:rgba(251,191,36,.3);background:var(--amber-l)}
+.sp-terminated{color:var(--text2);border-color:var(--border2);background:var(--bg3)}
+.ac-fee{font-family:var(--mono);font-size:12px;color:var(--gold2);margin-bottom:6px}
+.ac-creator{font-family:var(--mono);font-size:9px;color:var(--text2)}
+.empty-state{text-align:center;padding:3rem;color:var(--text3);font-size:12px;color:var(--text2)}
+.empty-icon{font-size:2.3rem;display:block;margin-bottom:10px;opacity:.35}
+
+.tx-log{background:var(--bg1);border:1px solid var(--border);border-radius:12px;overflow:hidden}
+.tx-log-hdr{display:flex;align-items:center;justify-content:space-between;padding:1rem 1.5rem;border-bottom:1px solid var(--border);font-family:var(--serif);font-size:16px;font-weight:600;color:var(--text)}
+.tx-entries{max-height:170px;overflow-y:auto}
+.tx-entries::-webkit-scrollbar{width:3px}.tx-entries::-webkit-scrollbar-thumb{background:var(--border2)}
+.tx-entry{display:flex;align-items:center;gap:10px;padding:9px 1.5rem;border-bottom:1px solid var(--border);font-family:var(--mono);font-size:10px;animation:fade-up .2s ease}
+.tx-entry:last-child{border-bottom:none}
+.tx-dot{width:7px;height:7px;border-radius:50%;flex-shrink:0}
+.dok{background:var(--green)}.derr{background:var(--red)}
+.tx-method{color:var(--gold2);flex:1}.tx-detail{color:var(--text2);font-size:9px}.tx-time{color:var(--text2);font-size:9px}
+.tok{color:var(--green);font-size:9px}.terr{color:var(--red);font-size:9px}
+.empty-log{padding:1.5rem;text-align:center;font-size:11px;color:var(--text2)}
+::-webkit-scrollbar{width:4px}::-webkit-scrollbar-track{background:var(--bg)}::-webkit-scrollbar-thumb{background:var(--border2)}
+</style>
+</head>
+<body>
+
+<header>
+  <div class="logo">
+    <div class="logo-icon">◈</div>
+    <div><div class="logo-name">Living IP Vault</div><div class="logo-sub">Self-Governing Licensing · GenLayer</div></div>
+  </div>
+  <div class="header-right">
+    <div class="hchip"><div class="hdot g"></div>AI Consensus</div>
+    <div class="hchip"><div class="hdot b"></div>5 Validators</div>
+    <div class="contract-tag">0x639b7…F097b8</div>
+  </div>
+</header>
+
+<div class="wrap">
+
+  <div class="hero">
+    <div class="hero-badge">◈ AUTONOMOUS IP LICENSING PROTOCOL</div>
+    <h1 class="hero-title">IP that <em>enforces</em><br>its own terms</h1>
+    <p class="hero-sub">Register an asset, define a policy in plain rules, and let five independent AI validators monitor real-world usage — automatically suspending licenses that breach policy, adjusting fees with demand, and routing disputes to a DAO jury.</p>
+  </div>
+
+  <div class="stats">
+    <div class="stat"><div class="stat-label">IP Assets</div><div class="stat-val gold" id="st-ips">0</div></div>
+    <div class="stat"><div class="stat-label">Active Licenses</div><div class="stat-val green" id="st-licenses">0</div></div>
+    <div class="stat"><div class="stat-label">Suspended</div><div class="stat-val amber" id="st-suspended">0</div></div>
+    <div class="stat"><div class="stat-label">Disputes</div><div class="stat-val blue" id="st-disputes">0</div></div>
+  </div>
+
+  <div class="tabs">
+    <div class="tab active" onclick="switchTab('register',this)">Register IP</div>
+    <div class="tab" onclick="switchTab('license',this)">License</div>
+    <div class="tab" onclick="switchTab('review',this)">AI Review</div>
+    <div class="tab" onclick="switchTab('disputes',this)">Disputes</div>
+    <div class="tab" onclick="switchTab('vault',this)">Vault</div>
+  </div>
+
+  <!-- REGISTER -->
+  <div class="panel active" id="panel-register">
+    <div class="card grid-full">
+      <div class="card-title"><div class="card-icon ci-gold">◈</div>Register IP Asset<span class="method-tag">register_ip() · WRITE</span></div>
+      <div class="field"><label class="field-label">Title</label><input type="text" id="ri-title" value="Summer Nights" placeholder="Asset title"></div>
+      <div class="field-row">
+        <div class="field"><label class="field-label">Base Fee</label><input type="text" id="ri-fee" value="100"></div>
+        <div class="field"><label class="field-label">Max Risk Threshold (0-1)</label><input type="text" id="ri-risk" value="0.5"></div>
+      </div>
+      <div class="field"><label class="field-label">Licensing Policy</label>
+        <div class="checkbox-row">
+          <label class="checkbox-item"><input type="checkbox" id="pol-political"> Allow Political</label>
+          <label class="checkbox-item"><input type="checkbox" id="pol-gambling"> Allow Gambling</label>
+          <label class="checkbox-item"><input type="checkbox" id="pol-adult"> Allow Adult</label>
+          <label class="checkbox-item" checked><input type="checkbox" id="pol-ai" checked> Allow AI Training</label>
+        </div>
+      </div>
+      <div style="margin-top:14px;display:flex;gap:10px;align-items:center">
+        <button class="btn btn-gold" id="ri-btn" onclick="registerIP()"><span id="ri-txt">◈ Register Asset</span></button>
+        <span id="ri-sp" style="display:none"><span class="spinner"></span></span>
+      </div>
+      <div class="terminal" id="ri-terminal">
+        <div class="term-bar"><div class="tdot" style="background:#ff5f57"></div><div class="tdot" style="background:#febc2e"></div><div class="tdot" style="background:#28c840"></div><span class="term-lbl">GENVM OUTPUT</span></div>
+        <div class="term-out" id="ri-out"></div>
+      </div>
+    </div>
+    <div class="card grid-full" style="margin-top:1.5rem">
+      <div class="card-title"><div class="card-icon ci-gold">📋</div>Registered Assets</div>
+      <div class="asset-grid" id="assets-grid"><div class="empty-state"><span class="empty-icon">◈</span>No IP assets registered yet.</div></div>
+    </div>
+  </div>
+
+  <!-- LICENSE -->
+  <div class="panel" id="panel-license">
+    <div class="grid">
+      <div class="card">
+        <div class="card-title"><div class="card-icon ci-green">🤝</div>Purchase License<span class="method-tag">purchase_license()</span></div>
+        <div class="field"><label class="field-label">IP Asset ID</label><input type="text" id="pl-ipid" placeholder="1"></div>
+        <div class="field"><label class="field-label">Payment Amount</label><input type="text" id="pl-payment" placeholder="100"></div>
+        <div style="margin-top:12px;display:flex;gap:10px;align-items:center">
+          <button class="btn btn-green" id="pl-btn" onclick="purchaseLicense()"><span id="pl-txt">🤝 Purchase</span></button>
+          <span id="pl-sp" style="display:none"><span class="spinner dark"></span></span>
+        </div>
+        <div class="terminal" id="pl-terminal">
+          <div class="term-bar"><div class="tdot" style="background:#ff5f57"></div><div class="tdot" style="background:#febc2e"></div><div class="tdot" style="background:#28c840"></div><span class="term-lbl">GENVM OUTPUT</span></div>
+          <div class="term-out" id="pl-out"></div>
+        </div>
+      </div>
+      <div class="card">
+        <div class="card-title"><div class="card-icon ci-blue">🔍</div>Query License<span class="method-tag">get_license() · VIEW</span></div>
+        <div class="field"><label class="field-label">License ID</label><input type="text" id="ql-id" placeholder="1"></div>
+        <div style="margin-top:12px"><button class="btn btn-outline btn-full" onclick="queryLicense()">🔍 Query</button></div>
+        <pre id="ql-output" style="display:none;margin-top:12px;background:var(--bg);border:1px solid var(--border);border-radius:8px;padding:12px;font-family:var(--mono);font-size:9.5px;color:var(--gold2);white-space:pre-wrap;max-height:200px;overflow-y:auto"></pre>
+      </div>
+    </div>
+  </div>
+
+  <!-- AI REVIEW -->
+  <div class="panel" id="panel-review">
+    <div class="card grid-full">
+      <div class="card-title"><div class="card-icon ci-amber">🛰</div>AI Usage Review<span class="method-tag">review_license_usage() · ORACLE</span></div>
+      <div class="field-row">
+        <div class="field"><label class="field-label">License ID</label><input type="text" id="rv-license" placeholder="1"></div>
+        <div class="field"><label class="field-label">Usage Evidence URL</label><input type="text" id="rv-url" value="https://tiktok.com/@brand/video/789123456" placeholder="https://..."></div>
+      </div>
+      <div style="margin-top:12px;display:flex;gap:10px;align-items:center">
+        <button class="btn btn-gold" id="rv-btn" onclick="reviewUsage()"><span id="rv-txt">🛰 Run AI Consensus Review</span></button>
+        <span id="rv-sp" style="display:none"><span class="spinner"></span></span>
+      </div>
+      <div class="terminal" id="rv-terminal">
+        <div class="term-bar"><div class="tdot" style="background:#ff5f57"></div><div class="tdot" style="background:#febc2e"></div><div class="tdot" style="background:#28c840"></div><span class="term-lbl">AI CONSENSUS OUTPUT</span></div>
+        <div class="term-out" id="rv-out"></div>
+      </div>
+      <div class="result-card" id="rv-result"></div>
+    </div>
+  </div>
+
+  <!-- DISPUTES -->
+  <div class="panel" id="panel-disputes">
+    <div class="grid">
+      <div class="card">
+        <div class="card-title"><div class="card-icon ci-amber">📜</div>Lodge Appeal<span class="method-tag">lodge_appeal()</span></div>
+        <div class="field"><label class="field-label">License ID</label><input type="text" id="la-license" placeholder="1"></div>
+        <div class="field"><label class="field-label">Job ID</label><input type="text" id="la-job" placeholder="1"></div>
+        <div class="field"><label class="field-label">Bond Amount</label><input type="text" id="la-bond" value="5"></div>
+        <div style="margin-top:12px;display:flex;gap:10px;align-items:center">
+          <button class="btn btn-outline btn-full" id="la-btn" onclick="lodgeAppeal()"><span id="la-txt">📜 Lodge Appeal</span></button>
+          <span id="la-sp" style="display:none"><span class="spinner dark"></span></span>
+        </div>
+        <div class="terminal" id="la-terminal">
+          <div class="term-bar"><div class="tdot" style="background:#ff5f57"></div><div class="tdot" style="background:#febc2e"></div><div class="tdot" style="background:#28c840"></div><span class="term-lbl">GENVM OUTPUT</span></div>
+          <div class="term-out" id="la-out"></div>
+        </div>
+      </div>
+      <div class="card">
+        <div class="card-title"><div class="card-icon ci-red">⚖</div>Resolve Dispute<span class="method-tag">resolve_dispute() · JURY</span></div>
+        <div class="field"><label class="field-label">License ID</label><input type="text" id="rsd-license" placeholder="1"></div>
+        <div class="field"><label class="field-label">Decision</label>
+          <select id="rsd-decision" style="width:100%;background:var(--bg);border:1px solid var(--border2);color:var(--text);font-family:var(--mono);font-size:11px;padding:10px 13px;outline:none;border-radius:8px">
+            <option value="true">Override — Restore License</option>
+            <option value="false">Confirm — Terminate License</option>
+          </select>
+        </div>
+        <div style="margin-top:12px;display:flex;gap:10px;align-items:center">
+          <button class="btn btn-red" id="rsd-btn" onclick="resolveDispute()"><span id="rsd-txt">⚖ Issue Ruling</span></button>
+          <span id="rsd-sp" style="display:none"><span class="spinner"></span></span>
+        </div>
+        <div class="terminal" id="rsd-terminal">
+          <div class="term-bar"><div class="tdot" style="background:#ff5f57"></div><div class="tdot" style="background:#febc2e"></div><div class="tdot" style="background:#28c840"></div><span class="term-lbl">GENVM OUTPUT</span></div>
+          <div class="term-out" id="rsd-out"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- VAULT -->
+  <div class="panel" id="panel-vault">
+    <div class="card grid-full">
+      <div class="card-title"><div class="card-icon ci-green">🏦</div>Vault Balance<span class="method-tag">get_balance() / withdraw_earnings()</span></div>
+      <div class="field"><label class="field-label">Address</label><input type="text" id="vb-addr" placeholder="0xYourAddress…"></div>
+      <div style="margin-top:12px;display:flex;gap:10px">
+        <button class="btn btn-outline" onclick="queryBalance()">🔍 Check Balance</button>
+        <button class="btn btn-green" id="we-btn" onclick="withdrawEarnings()"><span id="we-txt">🏦 Withdraw Earnings</span></button>
+        <span id="we-sp" style="display:none"><span class="spinner dark"></span></span>
+      </div>
+      <div class="query-result" id="vb-result" style="display:none;margin-top:14px;font-family:var(--mono);font-size:13px;color:var(--gold2)"></div>
+      <div class="terminal" id="we-terminal">
+        <div class="term-bar"><div class="tdot" style="background:#ff5f57"></div><div class="tdot" style="background:#febc2e"></div><div class="tdot" style="background:#28c840"></div><span class="term-lbl">GENVM OUTPUT</span></div>
+        <div class="term-out" id="we-out"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- TX LOG -->
+  <div class="tx-log" style="margin-top:1.5rem">
+    <div class="tx-log-hdr">Transaction Log<button class="btn btn-outline" onclick="txLog=[];renderTxLog()" style="padding:4px 10px;font-size:10px;font-family:var(--mono)">Clear</button></div>
+    <div class="tx-entries" id="tx-entries"><div class="empty-log">No transactions yet</div></div>
+  </div>
+
+</div>
+
+<script>
+let ips=[], licenses=[], jobs=[], disputes=[], balances={}, txLog=[];
+
+const NODES = [
+  {id:'0x4d2D27b0', model:'deepseek/deepseek-v4-pro'},
+  {id:'0x316254B2', model:'anthropic/claude-sonnet'},
+  {id:'0xBfbC0616', model:'qwen/qwen3.6-max'},
+  {id:'0x61309C7e', model:'mistralai/mistral-medium'},
+  {id:'0xf93f1743', model:'qwen/qwen3.6-plus'},
+];
+
+function now(){ return new Date().toLocaleTimeString('en',{hour12:false}); }
+function shortAddr(a){ return a.length>14 ? a.slice(0,8)+'…'+a.slice(-6) : a; }
+function addTx(m,s,d){ txLog.unshift({m,s,d,t:now()}); renderTxLog(); }
+function renderTxLog(){
+  const el=document.getElementById('tx-entries');
+  if(!txLog.length){el.innerHTML='<div class="empty-log">No transactions yet</div>';return;}
+  el.innerHTML=txLog.slice(0,14).map(t=>`<div class="tx-entry"><div class="tx-dot ${t.s==='ok'?'dok':'derr'}"></div><span class="tx-method">${t.m}</span><span class="${t.s==='ok'?'tok':'terr'}">${t.s==='ok'?'✓ ACCEPTED':'✗ REVERTED'}</span><span class="tx-detail">${t.d}</span><span class="tx-time">${t.t}</span></div>`).join('');
+}
+function setLoad(id,on,lbl){
+  const b=document.getElementById(id+'-btn'),s=document.getElementById(id+'-sp'),t=document.getElementById(id+'-txt');
+  if(b)b.disabled=on;if(s)s.style.display=on?'inline':'none';if(t&&!on&&lbl)t.textContent=lbl;if(t&&on)t.textContent='…';
+}
+function showTerm(id,lines){
+  const t=document.getElementById(id+'-terminal'),o=document.getElementById(id+'-out');
+  t.classList.add('visible');o.innerHTML=lines.map(([c,l])=>`<span class="${c}">${l}</span>\n`).join('');
+}
+function appTerm(id,lines){
+  const o=document.getElementById(id+'-out');
+  lines.forEach(([c,l])=>o.innerHTML+=`<span class="${c}">${l}</span>\n`);
+  o.scrollTop=o.scrollHeight;
+}
+function switchTab(id,el){
+  document.querySelectorAll('.panel').forEach(p=>p.classList.remove('active'));
+  document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));
+  document.getElementById('panel-'+id).classList.add('active');
+  el.classList.add('active');
+}
+function updateStats(){
+  document.getElementById('st-ips').textContent       = ips.length;
+  document.getElementById('st-licenses').textContent  = licenses.filter(l=>l.status==='Active').length;
+  document.getElementById('st-suspended').textContent = licenses.filter(l=>l.status==='Suspended').length;
+  document.getElementById('st-disputes').textContent  = disputes.length;
+}
+
+function registerIP(){
+  const title = document.getElementById('ri-title').value.trim();
+  const fee   = document.getElementById('ri-fee').value.trim();
+  const risk  = document.getElementById('ri-risk').value.trim();
+  if(!title||!fee||!risk) return;
+  const policy = {
+    allow_political: document.getElementById('pol-political').checked,
+    allow_gambling:  document.getElementById('pol-gambling').checked,
+    allow_adult:     document.getElementById('pol-adult').checked,
+    allow_ai_training: document.getElementById('pol-ai').checked,
+  };
+  setLoad('ri',true);
+  showTerm('ri',[
+    ['td',`> genlayer write register_ip --args '"${title}","${fee}","${risk}","..."'`],
+    ['tb','Broadcasting transaction…'],
+  ]);
+  setTimeout(()=>{
+    const id = ips.length+1;
+    ips.push({id, title, base_fee:parseInt(fee), current_fee:parseInt(fee), status:'Active', creator:'0xYou'+Math.random().toString(16).slice(2,8), policy, violation_count:0});
+    appTerm('ri',[
+      ['tg','✓ Transaction accepted — state committed'],
+      ['td',`  state["ip:${id}"].title  = "${title}"`],
+      ['td',`  state["ip:${id}"].status = "Active"`],
+      ['tg',`  → returned ip_id = ${id}`],
+    ]);
+    setLoad('ri',false,'◈ Register Asset');
+    addTx(`register_ip("${title}")`,'ok',`id=${id}`);
+    updateStats(); renderAssets();
+    document.getElementById('pl-ipid').value = id;
+  },1100);
+}
+
+function purchaseLicense(){
+  const ipId = document.getElementById('pl-ipid').value.trim();
+  const payment = document.getElementById('pl-payment').value.trim();
+  if(!ipId||!payment) return;
+  setLoad('pl',true);
+  showTerm('pl',[
+    ['td',`> genlayer write purchase_license --args '${ipId},"${payment}"'`],
+    ['tb','Broadcasting transaction…'],
+  ]);
+  setTimeout(()=>{
+    const ip = ips.find(x=>x.id==ipId);
+    if(!ip){appTerm('pl',[['tr','✗ Exception: State: Asset unavailable.']]);setLoad('pl',false,'🤝 Purchase');addTx(`purchase_license(${ipId})`,'err','not found');return;}
+    if(parseInt(payment) < ip.current_fee){appTerm('pl',[['tr','✗ Exception: Value: Insufficient payment.']]);setLoad('pl',false,'🤝 Purchase');addTx(`purchase_license(${ipId})`,'err','insufficient payment');return;}
+    const lid = licenses.length+1;
+    licenses.push({id:lid, ip_id:parseInt(ipId), licensee:'0xLicensee'+Math.random().toString(16).slice(2,8), status:'Active', last_risk_score:0, last_demand_score:0, context_class:'neutral'});
+    balances[ip.creator] = (balances[ip.creator]||0) + parseInt(payment);
+    appTerm('pl',[
+      ['tg','✓ Transaction accepted — state committed'],
+      ['td',`  state["license:${lid}"].status = "Active"`],
+      ['td',`  balance["${shortAddr(ip.creator)}"] += ${payment}`],
+      ['tg',`  → returned license_id = ${lid}`],
+    ]);
+    setLoad('pl',false,'🤝 Purchase');
+    addTx(`purchase_license(${ipId})`,'ok',`license_id=${lid}`);
+    updateStats();
+    document.getElementById('rv-license').value = lid;
+    document.getElementById('ql-id').value = lid;
+  },1100);
+}
+
+function queryLicense(){
+  const id = document.getElementById('ql-id').value.trim();
+  const out = document.getElementById('ql-output');
+  out.style.display='block';
+  const l = licenses.find(x=>x.id==id);
+  out.textContent = l ? JSON.stringify(l,null,2) : '{"error": "License not found."}';
+  addTx(`get_license(${id})`, l?'ok':'err', l?l.status:'not found');
+}
+
+function reviewUsage(){
+  const licId = document.getElementById('rv-license').value.trim();
+  const url = document.getElementById('rv-url').value.trim();
+  if(!licId||!url) return;
+  setLoad('rv',true);
+  document.getElementById('rv-result').className = 'result-card';
+
+  showTerm('rv',[
+    ['td',`> genlayer write review_license_usage --args '${licId},"${url.slice(0,35)}…"'`],
+    ['tb','Broadcasting transaction…'],
+    ['ta',`gl.nondet.web.render("${url.slice(0,35)}…") → fetching usage evidence…`],
+    ['ta','gl.nondet.exec_prompt() → dispatching to 5 validator nodes…'],
+  ]);
+
+  const license = licenses.find(x=>x.id==licId);
+  if(!license){ setTimeout(()=>{appTerm('rv',[['tr','✗ Exception: State: Missing license.']]);setLoad('rv',false,'🛰 Run AI Consensus Review');addTx(`review_license_usage(${licId})`,'err','not found');},700); return; }
+
+  NODES.forEach((n,i)=>{
+    setTimeout(()=>appTerm('rv',[['td',`  node ${i+1}/5 [${n.id}] ${n.model} → analyzing placement…`]]),900+i*600);
+    setTimeout(()=>appTerm('rv',[['tg',`  node ${i+1}/5 [${n.id}] → verdict submitted ✓`]]),1400+i*600);
+  });
+
+  const total = 1400+NODES.length*600+700;
+  setTimeout(()=>appTerm('rv',[['ta','gl.eq_principle.strict_eq() → all 5 nodes agree on evaluation…']]),total-600);
+
+  setTimeout(()=>{
+    const ip = ips.find(x=>x.id===license.ip_id);
+    const policy = ip ? ip.policy : {allow_gambling:false};
+    const isGambling = url.toLowerCase().includes('casino')||url.toLowerCase().includes('bet')||url.toLowerCase().includes('gambl');
+    const breached = isGambling && !policy.allow_gambling;
+    const riskScore = breached ? (0.7+Math.random()*0.3) : (Math.random()*0.4);
+    const demandScore = Math.random();
+    const contextClass = breached ? 'controversial' : demandScore>0.65 ? 'commercial_viral' : 'neutral';
+
+    const jid = jobs.length+1;
+    jobs.push({id:jid, license_id:parseInt(licId), evidence_url:url, risk_score:riskScore, demand_score:demandScore, context_class:contextClass, policy_breached:breached});
+
+    let suspended = false;
+    if(breached || riskScore > 0.5 || contextClass==='controversial'){
+      if(license.status==='Active'){ license.status='Suspended'; suspended=true; if(ip) ip.violation_count=(ip.violation_count||0)+1; }
+    }
+    if(contextClass==='commercial_viral' || demandScore>0.65){
+      const mult = Math.min(1+(demandScore*1.5), 3.0);
+      if(ip){ ip.current_fee = Math.round(ip.base_fee*mult); }
+    }
+    license.last_risk_score = riskScore; license.last_demand_score = demandScore; license.context_class = contextClass;
+
+    appTerm('rv',[
+      [breached?'tr':'tg', `✓ Consensus: ALL 5 validators agree → risk=${riskScore.toFixed(2)} demand=${demandScore.toFixed(2)}`],
+      ['td', `  state["job:${jid}"].context_class = "${contextClass}"`],
+      ['td', `  state["job:${jid}"].policy_breached = ${breached}`],
+      [suspended?'tr':'tg', suspended ? `  → license #${licId} SUSPENDED` : `  → no action taken, license remains Active`],
+    ]);
+
+    const rEl = document.getElementById('rv-result');
+    rEl.className = 'result-card visible ' + (suspended?'suspended':'active');
+    rEl.innerHTML = `
+      <div class="rc-label">${suspended ? '🚫 License Suspended' : '✅ Compliant Usage'}</div>
+      <div style="font-family:var(--mono);font-size:11px;color:var(--text2)">Job #${jid} · ${contextClass.replace('_',' ')}</div>
+      <div class="rc-meta">
+        <div class="rc-meta-item"><div class="rc-meta-label">Risk Score</div><div class="rc-meta-val">${riskScore.toFixed(2)}</div></div>
+        <div class="rc-meta-item"><div class="rc-meta-label">Demand Score</div><div class="rc-meta-val">${demandScore.toFixed(2)}</div></div>
+        <div class="rc-meta-item"><div class="rc-meta-label">Policy Breach</div><div class="rc-meta-val" style="color:${breached?'var(--red)':'var(--green)'}">${breached}</div></div>
+      </div>`;
+
+    setLoad('rv',false,'🛰 Run AI Consensus Review');
+    addTx(`review_license_usage(${licId})`,'ok',`risk=${riskScore.toFixed(2)}`);
+    updateStats(); renderAssets();
+    document.getElementById('la-license').value = licId;
+    document.getElementById('la-job').value = jid;
+  },total);
+}
+
+function lodgeAppeal(){
+  const licId = document.getElementById('la-license').value.trim();
+  const jobId = document.getElementById('la-job').value.trim();
+  const bond = document.getElementById('la-bond').value.trim();
+  if(!licId||!jobId||!bond) return;
+  setLoad('la',true);
+  const t=document.getElementById('la-terminal'),o=document.getElementById('la-out');
+  t.classList.add('visible');
+  o.innerHTML=`<span class="td">> genlayer write lodge_appeal --args '${licId},${jobId},"${bond}"'</span>\n<span class="tb">Broadcasting…</span>\n`;
+  setTimeout(()=>{
+    const license = licenses.find(x=>x.id==licId);
+    if(!license || license.status!=='Suspended'){
+      o.innerHTML+=`<span class="tr">✗ Exception: State: Not suspended.</span>\n`;
+      setLoad('la',false,'📜 Lodge Appeal');addTx(`lodge_appeal(${licId})`,'err','not suspended');return;
+    }
+    license.status = 'Under_Appeal';
+    const job = jobs.find(x=>x.id==jobId);
+    disputes.push({license_id:parseInt(licId), licensee:license.licensee, escrow_bond:parseInt(bond), status:'Under_Review', evidence_url:job?job.evidence_url:'', flagged_risk_score:job?job.risk_score:0, consensus_job_id:parseInt(jobId)});
+    o.innerHTML+=`<span class="tg">✓ Transaction accepted — state committed</span>\n<span class="td">  state["license:${licId}"].status = "Under_Appeal"</span>\n<span class="tg">  → "Appeal lodged for license #${licId}. Bond: ${bond}"</span>\n`;
+    setLoad('la',false,'📜 Lodge Appeal');
+    addTx(`lodge_appeal(${licId})`,'ok',`bond=${bond}`);
+    updateStats();
+    document.getElementById('rsd-license').value = licId;
+  },1000);
+}
+
+function resolveDispute(){
+  const licId = document.getElementById('rsd-license').value.trim();
+  const decision = document.getElementById('rsd-decision').value === 'true';
+  if(!licId) return;
+  setLoad('rsd',true);
+  showTerm('rsd',[
+    ['td',`> genlayer write resolve_dispute --args '${licId},${decision}'`],
+    ['tb','Broadcasting transaction…'],
+  ]);
+  setTimeout(()=>{
+    const dispute = disputes.find(x=>x.license_id==licId && x.status==='Under_Review');
+    if(!dispute){appTerm('rsd',[['tr','✗ Exception: State: Case inactive.']]);setLoad('rsd',false,'⚖ Issue Ruling');addTx(`resolve_dispute(${licId})`,'err','no active case');return;}
+    const license = licenses.find(x=>x.id==licId);
+    const ip = ips.find(x=>x.id===license.ip_id);
+    if(decision){
+      license.status='Active';
+      balances[dispute.licensee] = (balances[dispute.licensee]||0)+dispute.escrow_bond;
+      appTerm('rsd',[['tg','✓ Consensus: AI_OVERRIDDEN_LICENSE_RESTORED'],['td',`  bond refunded to licensee`],['tg',`  → license #${licId} restored to Active`]]);
+    } else {
+      license.status='Terminated';
+      if(ip) balances[ip.creator] = (balances[ip.creator]||0)+dispute.escrow_bond;
+      appTerm('rsd',[['tr','✓ Consensus: AI_CONFIRMED_LICENSE_TERMINATED'],['td',`  bond transferred to IP creator`],['tr',`  → license #${licId} terminated`]]);
+    }
+    dispute.status='Settled';
+    setLoad('rsd',false,'⚖ Issue Ruling');
+    addTx(`resolve_dispute(${licId})`,'ok',decision?'restored':'terminated');
+    updateStats(); renderAssets();
+  },1200);
+}
+
+function queryBalance(){
+  const addr = document.getElementById('vb-addr').value.trim();
+  const r = document.getElementById('vb-result');
+  r.style.display='block';
+  r.textContent = 'Balance: ' + (balances[addr]||0);
+  addTx(`get_balance("${shortAddr(addr)}")`,'ok',balances[addr]||0);
+}
+
+function withdrawEarnings(){
+  const addr = document.getElementById('vb-addr').value.trim();
+  if(!addr) return;
+  setLoad('we',true);
+  const t=document.getElementById('we-terminal'),o=document.getElementById('we-out');
+  t.classList.add('visible');
+  o.innerHTML=`<span class="td">> genlayer write withdraw_earnings</span>\n<span class="tb">Broadcasting…</span>\n`;
+  setTimeout(()=>{
+    const bal = balances[addr]||0;
+    if(bal<=0){o.innerHTML+=`<span class="tr">✗ Exception: Finances: Balance zero.</span>\n`;setLoad('we',false,'🏦 Withdraw Earnings');addTx('withdraw_earnings()','err','zero balance');return;}
+    balances[addr]=0;
+    o.innerHTML+=`<span class="tg">✓ Transaction accepted</span>\n<span class="tg">  → "Withdrawn: ${bal} for ${shortAddr(addr)}"</span>\n`;
+    setLoad('we',false,'🏦 Withdraw Earnings');
+    addTx('withdraw_earnings()','ok',`${bal}`);
+  },900);
+}
+
+function renderAssets(){
+  const el = document.getElementById('assets-grid');
+  if(!ips.length){ el.innerHTML='<div class="empty-state"><span class="empty-icon">◈</span>No IP assets registered yet.</div>'; return; }
+  el.innerHTML = ips.map(ip=>{
+    const cls = ip.status==='Active' ? 'active-ip' : 'suspended-ip';
+    return `<div class="asset-card ${cls}">
+      <div class="ac-head">
+        <div><div class="ac-title">${ip.title}</div><div class="ac-id">IP #${ip.id}</div></div>
+        <div class="status-pill ${ip.status==='Active'?'sp-active':'sp-suspended'}">${ip.status}</div>
+      </div>
+      <div class="ac-fee">Fee: ${ip.current_fee} ${ip.current_fee!==ip.base_fee?'(base '+ip.base_fee+')':''}</div>
+      <div class="ac-creator">${shortAddr(ip.creator)} · ${ip.violation_count||0} violation(s)</div>
+    </div>`;
+  }).join('');
+}
+</script>
+</body>
+</html>

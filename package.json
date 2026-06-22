@@ -1,0 +1,21 @@
+{
+  "name": "living-ip-vault",
+  "version": "1.0.0",
+  "description": "GenLayer Intelligent Contract that autonomously enforces IP licensing terms using AI consensus — monitoring real-world usage, adjusting fees dynamically, and routing disputes to a DAO jury.",
+  "keywords": [
+    "genlayer", "ip", "licensing", "blockchain", "ai",
+    "consensus", "web3", "rights-management", "dao"
+  ],
+  "homepage": "https://studio.genlayer.com/?import-contract=0x639b7335022B0B7BafEddc5872E95AeB1dF097b8",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/JimmyOgb/living-ip-vault"
+  },
+  "license": "MIT",
+  "scripts": {
+    "dev": "npx serve frontend/",
+    "start": "npx serve frontend/",
+    "deploy:netlify": "netlify deploy --prod --dir frontend/",
+    "deploy:vercel": "vercel --prod"
+  }
+}
