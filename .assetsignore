@@ -1,0 +1,4 @@
+node_modules/
+.git/
+.wrangler/
+chore: add .assetsignore to skip node_modules
